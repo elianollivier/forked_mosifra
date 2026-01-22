@@ -1,0 +1,29 @@
+on: [push, pull_request]
+
+env:
+  RUST_DIR: "Mosifra-API"
+
+jobs:
+  sonar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - uses: dtolnay/rust-toolchain@stable
+        with: { components: clippy }
+
+      - run: cargo clippy --message-format=json > clippy.json
+        working-directory: ${{ env.RUST_DIR }}
+
+      - uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+            -Dsonar.sources=${{ env.RUST_DIR }}
+            -Dsonar.rust.clippy.reportPaths=${{ env.RUST_DIR }}/clippy.json
+            -Dsonar.exclusions=**/target/**,**/.git/**
