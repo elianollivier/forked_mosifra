@@ -24,7 +24,7 @@ jobs:
           args: >
             -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
             -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
-            -Dsonar.sources=${{ env.RUST_DIR }}/src
+            -Dsonar.sources=${{ env.RUST_DIR }}/src,Mosifra-Front
             -Dsonar.scm.disabled=true
             -Dsonar.rust.clippy.reportPaths=${{ env.RUST_DIR }}/clippy.json
-            -Dsonar.exclusions=**/target/**,**/.git/**
+            -Dsonar.exclusions=**/target/**,**/.git/**,**/node_modules/**,**/dist/**,**/public/**
