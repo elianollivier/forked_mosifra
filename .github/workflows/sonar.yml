@@ -28,3 +28,14 @@ jobs:
             -Dsonar.scm.disabled=true
             -Dsonar.rust.clippy.reportPaths=${{ env.RUST_DIR }}/clippy.json
             -Dsonar.exclusions=**/target/**,**/.git/**,**/node_modules/**,**/dist/**,**/public/**
+
+  security:
+    name: Security Audit (Gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
