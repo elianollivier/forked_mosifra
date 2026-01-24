@@ -10,10 +10,17 @@ jobs:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0, submodules: recursive }
 
-      - uses: dtolnay/rust-toolchain@stable
-        with: { components: clippy }
+      - uses: dtolnay/rust-toolchain@nightly
+        with: { components: clippy, llvm-tools-preview }
+
+      - name: Install cargo-llvm-cov
+        uses: taiki-e/install-action@cargo-llvm-cov
 
       - run: cargo clippy --message-format=json > clippy.json
+        working-directory: ${{ env.RUST_DIR }}
+
+      - name: Generate coverage report
+        run: cargo llvm-cov --lcov --output-path lcov.info
         working-directory: ${{ env.RUST_DIR }}
 
       - uses: SonarSource/sonarcloud-github-action@master
@@ -27,6 +34,7 @@ jobs:
             -Dsonar.sources=${{ env.RUST_DIR }}/src,Mosifra-Front
             -Dsonar.scm.disabled=true
             -Dsonar.rust.clippy.reportPaths=${{ env.RUST_DIR }}/clippy.json
+            -Dsonar.rust.lcov.reportPaths=${{ env.RUST_DIR }}/lcov.info
             -Dsonar.exclusions=**/target/**,**/.git/**,**/node_modules/**,**/dist/**,**/public/**
 
   security:
