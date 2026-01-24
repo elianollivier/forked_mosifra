@@ -83,7 +83,7 @@ services:
     environment:
       API_URL: ${API_ROOT}:${API_PORT}
     ports:
-      - "8070:80"
+      - "8070:8080"
 
 volumes:
   db_data:
