@@ -1,49 +1,22 @@
-# Backend Setup
+# Project Setup
 
-The backend for Mosifra can be run either using a **Nix Flake** or with a
-manually installed Rust toolchain.
+This project can be run using either a **Nix Flake** or with packages installed directly on your machine.
 
-## Requirement
+## Using the Nix Flake
 
-You'll need an environment file containing the hash for the jwt and the secret
-for Rocket.
-
-## Using Nix Flake
-
-The provided flake sets up all the necessary dependencies, including:
-
-- `cargo`
-- `rustc`
-- `rustfmt`
-- `clippy`
-- `rust-analyzer`
-- `sqls`
-
-The `sqls` dependency is optional and could prove useful only in development.
-
-Once inside the flake development shell, you can run the API with:
-
+The flake handles running all the necessary commands automatically through a development shell.  
+To use it, you only need **Nix** installed with the experimental features `nix-command` and `flakes` enabled.
+Enter the development shell by executing:
 ```bash
-cargo run
+nix develop
 ```
 
-To use the flake, you need **Nix** installed with the experimental features
-`nix-command` and `flakes` enabled.
+## Running locally without Flakes
 
-## Running Locally Without Flake
+If you prefer to run the project using the packages already available on your system, you will need **Docker** installed.  
 
-If you prefer not to use Nix, you will need a working **Rust toolchain**
-installed on your system (including `cargo` and `rustc`).
-
-Once Rust is set up, you can start the API by navigating to the backend folder
-and running:
+Start the services with:
 
 ```bash
-cargo run
+docker compose up [options]
 ```
-
-## Notes
-
-- The flake also sets `RUST_SRC_PATH` for proper Rust tooling integration.
-- You can optionally launch `neovide` automatically inside the dev shell, as
-  configured in the flake.

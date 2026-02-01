@@ -1,0 +1,59 @@
+on: [push, pull_request]
+
+env:
+  RUST_DIR: "Mosifra-API"
+
+jobs:
+  sonar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0, submodules: recursive }
+
+      - uses: dtolnay/rust-toolchain@nightly
+        with: { components: clippy, llvm-tools-preview }
+
+      - name: Install cargo-llvm-cov
+        uses: taiki-e/install-action@cargo-llvm-cov
+
+      - run: cargo clippy --message-format=json > clippy.json
+        working-directory: ${{ env.RUST_DIR }}
+
+      - name: Generate coverage report
+        run: cargo llvm-cov --lcov --output-path lcov.info
+        working-directory: ${{ env.RUST_DIR }}
+
+      - uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+            -Dsonar.sources=${{ env.RUST_DIR }}/src,Mosifra-Front
+            -Dsonar.scm.disabled=true
+            -Dsonar.rust.clippy.reportPaths=${{ env.RUST_DIR }}/clippy.json
+            -Dsonar.rust.lcov.reportPaths=${{ env.RUST_DIR }}/lcov.info
+            -Dsonar.exclusions=**/target/**,**/.git/**,**/node_modules/**,**/dist/**,**/public/**
+
+  security:
+    name: Security Audit (Gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+  tests:
+    name: Unit Tests (Rust)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { submodules: recursive }
+      - uses: dtolnay/rust-toolchain@nightly
+      - run: cargo test --verbose
+        working-directory: Mosifra-API

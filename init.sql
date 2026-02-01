@@ -1,85 +1,82 @@
+-- Table étudiant
+CREATE TABLE student (
+    id SERIAL PRIMARY KEY,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    login VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    mail VARCHAR(255) UNIQUE NOT NULL,
+    twofa VARCHAR(255) NULL
+);
+
 -- Table type de formation
 CREATE TABLE course_type (
     id SERIAL PRIMARY KEY,
-    name VARCHAR2(100) NOT NULL
-);
-
--- Table université
-CREATE TABLE university (
-    id VARCHAR2(128) PRIMARY KEY,
-    name VARCHAR2(255) NOT NULL,
-    login VARCHAR2(100) NOT NULL,
-    password VARCHAR2(255) NOT NULL,
-    mail VARCHAR2(255) UNIQUE NOT NULL
+    name VARCHAR(100) NOT NULL
 );
 
 -- Table promo
 CREATE TABLE class (
-    id VARCHAR2(128) PRIMARY KEY,
-    name VARCHAR2(100) NOT NULL,
-    course_type INT REFERENCES course_type(id) ON DELETE CASCADE,
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    course_type INT REFERENCES course_type(id) ON DELETE RESTRICT,
     start_date DATE,
     end_date DATE,
-    min_length INT, -- Minimum stage length in weeks
-    max_length INT, -- Maximum stage length in weeks
-    university_id VARCHAR2(128) REFERENCES university(id) ON DELETE CASCADE
+    min_size INT,
+    max_size INT
 );
 
+-- Relation n-n promo <-> étudiant
+CREATE TABLE student_class (
+    class_id INT REFERENCES class(id) ON DELETE RESTRICT,
+    student_id INT REFERENCES student(id) ON DELETE RESTRICT,
+    PRIMARY KEY (class_id, student_id)
+);
 
--- Table étudiant
-CREATE TABLE student (
-    id VARCHAR2(128) PRIMARY KEY,
-    first_name VARCHAR2(100) NOT NULL,
-    last_name VARCHAR2(100) NOT NULL,
-    login VARCHAR2(100) UNIQUE NOT NULL,
-    password VARCHAR2(255) NOT NULL,
-    mail VARCHAR2(255) UNIQUE NOT NULL,
-    class_id VARCHAR2(128) REFERENCES class(id) ON DELETE CASCADE
+-- Table université
+CREATE TABLE university (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    login VARCHAR(100) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    mail VARCHAR(255) UNIQUE NOT NULL,
+    twofa VARCHAR(255) NULL
+);
+
+-- Relation université <-> promo
+CREATE TABLE university_class (
+    university_id INT REFERENCES university(id) ON DELETE RESTRICT,
+    class_id INT REFERENCES class(id) ON DELETE RESTRICT,
+    PRIMARY KEY (university_id, class_id)
 );
 
 -- Table entreprise
 CREATE TABLE company (
-    id VARCHAR2(128) PRIMARY KEY,
-    name VARCHAR2(255) NOT NULL,
-    login VARCHAR2(100) UNIQUE NOT NULL,
-    password VARCHAR2(255) NOT NULL,
-    mail VARCHAR2(255) UNIQUE NOT NULL
-);
-
--- Table administrateur
-CREATE TABLE admin (
-    id VARCHAR2(128) PRIMARY KEY,
-    login VARCHAR2(100) UNIQUE NOT NULL,
-    password VARCHAR2(255) NOT NULL,
-    mail VARCHAR2(255) UNIQUE NOT NULL
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    login VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    mail VARCHAR(255) UNIQUE NOT NULL,
+    twofa VARCHAR(255) NULL
 );
 
 -- Table stage
 CREATE TABLE internship (
-    id VARCHAR2(128) PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     course_type INT REFERENCES course_type(id) ON DELETE RESTRICT,
-    company_id VARCHAR2(128) REFERENCES company(id) ON DELETE SET NULL,
-    university_id VARCHAR2(128) REFERENCES university(id) ON DELETE SET NULL,
-    start_date DATE, -- Total start time
-    end_date DATE, -- Total end time
-    min_internship_length INT, -- Minimum length of the internship
-    max_internship_length INT, -- Maximum length of the internship
-    title VARCHAR2(255),
+    company_id INT REFERENCES company(id) ON DELETE SET NULL,
+    start_date DATE,
+    end_date DATE,
+    min_internship_length INT,
+    max_internship_length INT,
+    title VARCHAR(255),
     description TEXT,
-    place VARCHAR2(255)
-    
-    CONSTRAINT chek_internship_creator CHECK (
-        (company_id IS NOT NULL AND university_id IS NULL)
-     OR (company_id IS NULL AND university_id IS NOT NULL)
-    )
+    place VARCHAR(255)
 );
 
 -- Relation université <-> stage
 CREATE TABLE university_internship (
-    university_id VARCHAR2(128) REFERENCES university(id) ON DELETE CASCADE,
-    internship_id VARCHAR2(128) REFERENCES internship(id) ON DELETE CASCADE,
+    university_id INT REFERENCES university(id) ON DELETE RESTRICT,
+    internship_id INT REFERENCES internship(id) ON DELETE RESTRICT,
     PRIMARY KEY (university_id, internship_id)
 );
-INSERT INTO course_type (name) VALUES ('info'); -- 1
-
-

@@ -1,0 +1,6 @@
+[submodule "Mosifra-Front"]
+	path = Mosifra-Front
+	url = https://github.com/elianollivier/Mosifra-Front.git
+[submodule "Mosifra-API"]
+	path = Mosifra-API
+	url = https://github.com/elianollivier/Mosifra-API.git
